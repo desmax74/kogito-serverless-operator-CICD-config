@@ -1,0 +1,3022 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: kogito-serverless-operator-system
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: kogitoserverlessbuilds.sw.kogito.kie.org
+spec:
+  group: sw.kogito.kie.org
+  names:
+    kind: KogitoServerlessBuild
+    listKind: KogitoServerlessBuildList
+    plural: kogitoserverlessbuilds
+    singular: kogitoserverlessbuild
+  scope: Namespaced
+  versions:
+  - name: v1alpha08
+    schema:
+      openAPIV3Schema:
+        description: KogitoServerlessBuild is the Schema for the kogitoserverlessbuilds
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: KogitoServerlessBuildSpec defines the desired state of KogitoServerlessBuild
+            properties:
+              containerFile:
+                description: ContainerFile content used for the build
+                format: byte
+                type: string
+              imageName:
+                description: Image name
+                type: string
+              podMiddleName:
+                description: Middlename of the pod
+                type: string
+              workflowId:
+                description: Workflow's unique identifier
+                type: string
+            type: object
+          status:
+            description: KogitoServerlessBuildStatus defines the observed state of
+              KogitoServerlessBuild
+            properties:
+              buildPhase:
+                description: Current kaniko buildphase
+                type: string
+              builder:
+                description: Kaniko's build, used to ping the build to update the
+                  buildphase
+                properties:
+                  meta:
+                    description: ObjectReference is a subset of the kubernetes k8s.io/apimachinery/pkg/apis/meta/v1.Object
+                      interface. Objects in this API not necessarily represent Kubernetes
+                      objects, but this structure can help when needed.
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  spec:
+                    description: BuildSpec defines the Build operation to be executed
+                    properties:
+                      strategy:
+                        description: The strategy that should be used to perform the
+                          Build.
+                        enum:
+                        - routine
+                        - pod
+                        type: string
+                      tasks:
+                        description: The sequence of Build tasks to be performed as
+                          part of the Build execution.
+                        items:
+                          description: Task represents the abstract task. Only one
+                            of the task should be configured to represent the specific
+                            task chosen.
+                          properties:
+                            kaniko:
+                              description: a KanikoTask, for Kaniko strategy
+                              properties:
+                                additionalFlags:
+                                  description: AdditionalFlags -- List of additional
+                                    flags for  the Kaniko process (see https://github.com/GoogleContainerTools/kaniko/blob/main/README.md#additional-flags)
+                                  items:
+                                    type: string
+                                  type: array
+                                baseImage:
+                                  description: base image layer
+                                  type: string
+                                cache:
+                                  description: use a cache
+                                  properties:
+                                    enabled:
+                                      description: true if a cache is enabled
+                                      type: boolean
+                                    persistentVolumeClaim:
+                                      description: the PVC used to store the cache
+                                      type: string
+                                  type: object
+                                contextDir:
+                                  description: can be useful to share info with other
+                                    tasks
+                                  type: string
+                                image:
+                                  description: final image name
+                                  type: string
+                                name:
+                                  description: name of the task
+                                  type: string
+                                registry:
+                                  description: where to publish the final image
+                                  properties:
+                                    address:
+                                      description: the URI to access
+                                      type: string
+                                    ca:
+                                      description: the configmap which stores the
+                                        Certificate Authority
+                                      type: string
+                                    insecure:
+                                      description: if the container registry is insecure
+                                        (ie, http only)
+                                      type: boolean
+                                    organization:
+                                      description: the registry organization
+                                      type: string
+                                    secret:
+                                      description: the secret where credentials are
+                                        stored
+                                      type: string
+                                  type: object
+                                resources:
+                                  description: Resources -- optional compute resource
+                                    requirements for the Kaniko container
+                                  properties:
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                        x-kubernetes-int-or-string: true
+                                      description: 'Limits describes the maximum amount
+                                        of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                        x-kubernetes-int-or-string: true
+                                      description: 'Requests describes the minimum
+                                        amount of compute resources required. If Requests
+                                        is omitted for a container, it defaults to
+                                        Limits if that is explicitly specified, otherwise
+                                        to an implementation-defined value. More info:
+                                        https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                      type: object
+                                  type: object
+                                verbose:
+                                  description: log more information
+                                  type: boolean
+                              type: object
+                          type: object
+                        type: array
+                      timeout:
+                        description: Timeout defines the Build maximum execution duration.
+                          The Build deadline is set to the Build start time plus the
+                          Timeout duration. If the Build deadline is exceeded, the
+                          Build context is canceled, and its phase set to BuildPhaseFailed.
+                        format: duration
+                        type: string
+                    type: object
+                  status:
+                    description: BuildStatus defines the observed state of Build
+                    properties:
+                      baseImage:
+                        description: the base image used for this build
+                        type: string
+                      conditions:
+                        description: a list of conditions occurred during the build
+                        items:
+                          description: BuildCondition describes the state of a resource
+                            at a certain point.
+                          properties:
+                            lastTransitionTime:
+                              description: Last time the condition transitioned from
+                                one status to another.
+                              format: date-time
+                              type: string
+                            lastUpdateTime:
+                              description: The last time this condition was updated.
+                              format: date-time
+                              type: string
+                            message:
+                              description: A human-readable message indicating details
+                                about the transition.
+                              type: string
+                            reason:
+                              description: The reason for the condition's last transition.
+                              type: string
+                            status:
+                              description: Status of the condition, one of True, False,
+                                Unknown.
+                              type: string
+                            type:
+                              description: Type of integration condition.
+                              type: string
+                          required:
+                          - status
+                          - type
+                          type: object
+                        type: array
+                      digest:
+                        description: the digest from image
+                        type: string
+                      duration:
+                        description: how long it took for the build Change to Duration
+                          / ISO 8601 when CRD uses OpenAPI spec v3 https://github.com/OAI/OpenAPI-Specification/issues/845
+                        type: string
+                      error:
+                        description: the error description (if any)
+                        type: string
+                      failure:
+                        description: the reason of the failure (if any)
+                        properties:
+                          reason:
+                            description: a short text specifying the reason
+                            type: string
+                          recovery:
+                            description: the recovery attempted for this failure
+                            properties:
+                              attempt:
+                                description: attempt number
+                                type: integer
+                              attemptMax:
+                                description: maximum number of attempts
+                                type: integer
+                              attemptTime:
+                                description: time of the attempt execution
+                                format: date-time
+                                type: string
+                            required:
+                            - attempt
+                            - attemptMax
+                            type: object
+                          time:
+                            description: the time when the failure has happened
+                            format: date-time
+                            type: string
+                        required:
+                        - reason
+                        - recovery
+                        - time
+                        type: object
+                      image:
+                        description: the image name built
+                        type: string
+                      observedGeneration:
+                        description: ObservedGeneration is the most recent generation
+                          observed for this Build.
+                        format: int64
+                        type: integer
+                      phase:
+                        description: describes the phase
+                        type: string
+                      resourceVolume:
+                        description: reference to where the build resources are located
+                        properties:
+                          referenceName:
+                            description: ReferenceName name of the object holding
+                              the resources reference
+                            type: string
+                          referenceType:
+                            description: ReferenceType type of the resource holding
+                              the reference
+                            type: string
+                        required:
+                        - referenceName
+                        - referenceType
+                        type: object
+                      startedAt:
+                        description: the time when it started
+                        format: date-time
+                        type: string
+                    type: object
+                type: object
+              workflowId:
+                description: Workflow's unique identifier
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: kogitoserverlessplatforms.sw.kogito.kie.org
+spec:
+  group: sw.kogito.kie.org
+  names:
+    kind: KogitoServerlessPlatform
+    listKind: KogitoServerlessPlatformList
+    plural: kogitoserverlessplatforms
+    singular: kogitoserverlessplatform
+  scope: Namespaced
+  versions:
+  - name: v1alpha08
+    schema:
+      openAPIV3Schema:
+        description: KogitoServerlessPlatform is the Schema for the kogitoserverlessplatforms
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: KogitoServerlessPlatformSpec defines the desired state of
+              KogitoServerlessPlatform
+            properties:
+              build:
+                description: Build specify how to build the Workflow
+                properties:
+                  strategy:
+                    description: The strategy that should be used to perform the Build.
+                    enum:
+                    - routine
+                    - pod
+                    type: string
+                  tasks:
+                    description: The sequence of Build tasks to be performed as part
+                      of the Build execution.
+                    items:
+                      description: Task represents the abstract task. Only one of
+                        the task should be configured to represent the specific task
+                        chosen.
+                      properties:
+                        kaniko:
+                          description: a KanikoTask, for Kaniko strategy
+                          properties:
+                            additionalFlags:
+                              description: AdditionalFlags -- List of additional flags
+                                for  the Kaniko process (see https://github.com/GoogleContainerTools/kaniko/blob/main/README.md#additional-flags)
+                              items:
+                                type: string
+                              type: array
+                            baseImage:
+                              description: base image layer
+                              type: string
+                            cache:
+                              description: use a cache
+                              properties:
+                                enabled:
+                                  description: true if a cache is enabled
+                                  type: boolean
+                                persistentVolumeClaim:
+                                  description: the PVC used to store the cache
+                                  type: string
+                              type: object
+                            contextDir:
+                              description: can be useful to share info with other
+                                tasks
+                              type: string
+                            image:
+                              description: final image name
+                              type: string
+                            name:
+                              description: name of the task
+                              type: string
+                            registry:
+                              description: where to publish the final image
+                              properties:
+                                address:
+                                  description: the URI to access
+                                  type: string
+                                ca:
+                                  description: the configmap which stores the Certificate
+                                    Authority
+                                  type: string
+                                insecure:
+                                  description: if the container registry is insecure
+                                    (ie, http only)
+                                  type: boolean
+                                organization:
+                                  description: the registry organization
+                                  type: string
+                                secret:
+                                  description: the secret where credentials are stored
+                                  type: string
+                              type: object
+                            resources:
+                              description: Resources -- optional compute resource
+                                requirements for the Kaniko container
+                              properties:
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Limits describes the maximum amount
+                                    of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Requests describes the minimum amount
+                                    of compute resources required. If Requests is
+                                    omitted for a container, it defaults to Limits
+                                    if that is explicitly specified, otherwise to
+                                    an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                              type: object
+                            verbose:
+                              description: log more information
+                              type: boolean
+                          type: object
+                      type: object
+                    type: array
+                  timeout:
+                    description: Timeout defines the Build maximum execution duration.
+                      The Build deadline is set to the Build start time plus the Timeout
+                      duration. If the Build deadline is exceeded, the Build context
+                      is canceled, and its phase set to BuildPhaseFailed.
+                    format: duration
+                    type: string
+                type: object
+              cluster:
+                description: Cluster what kind of cluster you're running (ie, plain
+                  Kubernetes or OpenShift)
+                type: string
+              configuration:
+                description: Configuration list of configuration properties to be
+                  attached to all the Workflow built from this Platform
+                properties:
+                  type:
+                    description: 'Type represents the type of configuration, ie: property,
+                      configmap, secret, ...'
+                    type: string
+                  value:
+                    description: Value a reference to the object for this configuration
+                      (syntax may vary depending on the `Type`)
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: 'If referring to a piece of an object instead
+                          of an entire object, this string should contain a valid
+                          JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within
+                          a pod, this would take on a value like: "spec.containers{name}"
+                          (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]"
+                          (container with index 2 in this pod). This syntax is chosen
+                          only to have some well-defined way of referencing a part
+                          of an object. TODO: this design is not final and this field
+                          is subject to change in the future.'
+                        type: string
+                      kind:
+                        description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                        type: string
+                      name:
+                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                        type: string
+                      namespace:
+                        description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                        type: string
+                      resourceVersion:
+                        description: 'Specific resourceVersion to which this reference
+                          is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                        type: string
+                      uid:
+                        description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                required:
+                - type
+                - value
+                type: object
+              platform:
+                description: BuildPlatform specify how is the platform where we want
+                  to build the Workflow
+                properties:
+                  PublishStrategyOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  baseImage:
+                    description: a base image that can be used as base layer for all
+                      images. It can be useful if you want to provide some custom
+                      base image with further utility software
+                    type: string
+                  buildStrategy:
+                    description: the strategy to adopt for building an Integration
+                      base image
+                    enum:
+                    - routine
+                    - pod
+                    type: string
+                  publishStrategy:
+                    description: the strategy to adopt for publishing an Integration
+                      base image
+                    type: string
+                  registry:
+                    description: the image registry used to push/pull built images
+                    properties:
+                      address:
+                        description: the URI to access
+                        type: string
+                      ca:
+                        description: the configmap which stores the Certificate Authority
+                        type: string
+                      insecure:
+                        description: if the container registry is insecure (ie, http
+                          only)
+                        type: boolean
+                      organization:
+                        description: the registry organization
+                        type: string
+                      secret:
+                        description: the secret where credentials are stored
+                        type: string
+                    type: object
+                  timeout:
+                    description: how much time to wait before time out the build process
+                    type: string
+                type: object
+            type: object
+          status:
+            description: KogitoServerlessPlatformStatus defines the observed state
+              of KogitoServerlessPlatform
+            properties:
+              build:
+                description: Build specify how to build the Workflow
+                properties:
+                  strategy:
+                    description: The strategy that should be used to perform the Build.
+                    enum:
+                    - routine
+                    - pod
+                    type: string
+                  tasks:
+                    description: The sequence of Build tasks to be performed as part
+                      of the Build execution.
+                    items:
+                      description: Task represents the abstract task. Only one of
+                        the task should be configured to represent the specific task
+                        chosen.
+                      properties:
+                        kaniko:
+                          description: a KanikoTask, for Kaniko strategy
+                          properties:
+                            additionalFlags:
+                              description: AdditionalFlags -- List of additional flags
+                                for  the Kaniko process (see https://github.com/GoogleContainerTools/kaniko/blob/main/README.md#additional-flags)
+                              items:
+                                type: string
+                              type: array
+                            baseImage:
+                              description: base image layer
+                              type: string
+                            cache:
+                              description: use a cache
+                              properties:
+                                enabled:
+                                  description: true if a cache is enabled
+                                  type: boolean
+                                persistentVolumeClaim:
+                                  description: the PVC used to store the cache
+                                  type: string
+                              type: object
+                            contextDir:
+                              description: can be useful to share info with other
+                                tasks
+                              type: string
+                            image:
+                              description: final image name
+                              type: string
+                            name:
+                              description: name of the task
+                              type: string
+                            registry:
+                              description: where to publish the final image
+                              properties:
+                                address:
+                                  description: the URI to access
+                                  type: string
+                                ca:
+                                  description: the configmap which stores the Certificate
+                                    Authority
+                                  type: string
+                                insecure:
+                                  description: if the container registry is insecure
+                                    (ie, http only)
+                                  type: boolean
+                                organization:
+                                  description: the registry organization
+                                  type: string
+                                secret:
+                                  description: the secret where credentials are stored
+                                  type: string
+                              type: object
+                            resources:
+                              description: Resources -- optional compute resource
+                                requirements for the Kaniko container
+                              properties:
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Limits describes the maximum amount
+                                    of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: 'Requests describes the minimum amount
+                                    of compute resources required. If Requests is
+                                    omitted for a container, it defaults to Limits
+                                    if that is explicitly specified, otherwise to
+                                    an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                  type: object
+                              type: object
+                            verbose:
+                              description: log more information
+                              type: boolean
+                          type: object
+                      type: object
+                    type: array
+                  timeout:
+                    description: Timeout defines the Build maximum execution duration.
+                      The Build deadline is set to the Build start time plus the Timeout
+                      duration. If the Build deadline is exceeded, the Build context
+                      is canceled, and its phase set to BuildPhaseFailed.
+                    format: duration
+                    type: string
+                type: object
+              cluster:
+                description: Cluster what kind of cluster you're running (ie, plain
+                  Kubernetes or OpenShift)
+                type: string
+              conditions:
+                description: Conditions which are the conditions met (particularly
+                  useful when in ERROR phase)
+                items:
+                  description: PlatformCondition describes the state of a resource
+                    at a certain point.
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human-readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of platform condition (i.e. Kubernetes, OpenShift).
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              configuration:
+                description: Configuration list of configuration properties to be
+                  attached to all the Workflow built from this Platform
+                properties:
+                  type:
+                    description: 'Type represents the type of configuration, ie: property,
+                      configmap, secret, ...'
+                    type: string
+                  value:
+                    description: Value a reference to the object for this configuration
+                      (syntax may vary depending on the `Type`)
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: 'If referring to a piece of an object instead
+                          of an entire object, this string should contain a valid
+                          JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within
+                          a pod, this would take on a value like: "spec.containers{name}"
+                          (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]"
+                          (container with index 2 in this pod). This syntax is chosen
+                          only to have some well-defined way of referencing a part
+                          of an object. TODO: this design is not final and this field
+                          is subject to change in the future.'
+                        type: string
+                      kind:
+                        description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                        type: string
+                      name:
+                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                        type: string
+                      namespace:
+                        description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                        type: string
+                      resourceVersion:
+                        description: 'Specific resourceVersion to which this reference
+                          is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                        type: string
+                      uid:
+                        description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                required:
+                - type
+                - value
+                type: object
+              info:
+                additionalProperties:
+                  type: string
+                description: Info generic information related to the build of Kogito
+                  Serverless operator
+                type: object
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this Platform.
+                format: int64
+                type: integer
+              phase:
+                description: Phase defines in what phase the Platform is found
+                type: string
+              platform:
+                description: BuildPlatform specify how is the platform where we want
+                  to build the Workflow
+                properties:
+                  PublishStrategyOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  baseImage:
+                    description: a base image that can be used as base layer for all
+                      images. It can be useful if you want to provide some custom
+                      base image with further utility software
+                    type: string
+                  buildStrategy:
+                    description: the strategy to adopt for building an Integration
+                      base image
+                    enum:
+                    - routine
+                    - pod
+                    type: string
+                  publishStrategy:
+                    description: the strategy to adopt for publishing an Integration
+                      base image
+                    type: string
+                  registry:
+                    description: the image registry used to push/pull built images
+                    properties:
+                      address:
+                        description: the URI to access
+                        type: string
+                      ca:
+                        description: the configmap which stores the Certificate Authority
+                        type: string
+                      insecure:
+                        description: if the container registry is insecure (ie, http
+                          only)
+                        type: boolean
+                      organization:
+                        description: the registry organization
+                        type: string
+                      secret:
+                        description: the secret where credentials are stored
+                        type: string
+                    type: object
+                  timeout:
+                    description: how much time to wait before time out the build process
+                    type: string
+                type: object
+              version:
+                description: Version the Kogito Serverless operator version controlling
+                  this Platform
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: kogitoserverlessworkflows.sw.kogito.kie.org
+spec:
+  group: sw.kogito.kie.org
+  names:
+    kind: KogitoServerlessWorkflow
+    listKind: KogitoServerlessWorkflowList
+    plural: kogitoserverlessworkflows
+    shortNames:
+    - ksw
+    - workflow
+    singular: kogitoserverlessworkflow
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.annotations.sw\.kogito\.kie\.org\/profile
+      name: Profile
+      type: string
+    - jsonPath: .metadata.annotations.sw\.kogito\.kie\.org\/version
+      name: Version
+      type: string
+    - jsonPath: .status.address.url
+      name: Address
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Running')].status
+      name: Ready
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Running')].reason
+      name: Reason
+      type: string
+    name: v1alpha08
+    schema:
+      openAPIV3Schema:
+        description: KogitoServerlessWorkflow is the Schema for the kogitoserverlessworkflows
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: KogitoServerlessWorkflowSpec defines the desired state of
+              KogitoServerlessWorkflow
+            properties:
+              auth:
+                properties:
+                  name:
+                    type: string
+                  properties:
+                    properties:
+                      basic:
+                        properties:
+                          metadata:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - key
+                              - value
+                              type: object
+                            type: array
+                          password:
+                            type: string
+                          username:
+                            type: string
+                        required:
+                        - password
+                        - username
+                        type: object
+                      bearer:
+                        properties:
+                          metadata:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - key
+                              - value
+                              type: object
+                            type: array
+                          token:
+                            type: string
+                        required:
+                        - token
+                        type: object
+                      oauth2:
+                        properties:
+                          audiences:
+                            items:
+                              type: string
+                            type: array
+                          basic:
+                            type: string
+                          clientId:
+                            type: string
+                          clientSecret:
+                            type: string
+                          grantType:
+                            type: string
+                          metadata:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - key
+                              - value
+                              type: object
+                            type: array
+                          password:
+                            type: string
+                          requestedIssuer:
+                            type: string
+                          requestedSubject:
+                            type: string
+                          scopes:
+                            items:
+                              type: string
+                            type: array
+                          subjectToken:
+                            type: string
+                          username:
+                            type: string
+                        required:
+                        - clientId
+                        - grantType
+                        type: object
+                    type: object
+                  scheme:
+                    type: string
+                required:
+                - name
+                - properties
+                - scheme
+                type: object
+              autoRetries:
+                type: boolean
+              conditions:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              errors:
+                items:
+                  properties:
+                    code:
+                      type: string
+                    description:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - code
+                  - name
+                  type: object
+                type: array
+              events:
+                items:
+                  properties:
+                    correlation:
+                      items:
+                        properties:
+                          contextAttributeName:
+                            type: string
+                          contextAttributeValue:
+                            type: string
+                        required:
+                        - contextAttributeName
+                        type: object
+                      type: array
+                    dataOnly:
+                      type: boolean
+                    kind:
+                      type: string
+                    metadata:
+                      items:
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+                        required:
+                        - key
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      type: string
+                    source:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - name
+                  - type
+                  type: object
+                type: array
+              functions:
+                items:
+                  properties:
+                    authRef:
+                      type: string
+                    metadata:
+                      items:
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+                        required:
+                        - key
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      type: string
+                    operation:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - name
+                  - operation
+                  type: object
+                type: array
+              keepActive:
+                type: boolean
+              retries:
+                properties:
+                  delay:
+                    type: string
+                  increment:
+                    type: string
+                  jitter:
+                    type: string
+                  maxAttempts:
+                    type: integer
+                  maxDelay:
+                    type: string
+                  multiplier:
+                    type: string
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
+              secrets:
+                items:
+                  description: Secret holds secret data of a certain type. The total
+                    bytes of the values in the Data field must be less than MaxSecretSize
+                    bytes.
+                  properties:
+                    apiVersion:
+                      description: 'APIVersion defines the versioned schema of this
+                        representation of an object. Servers should convert recognized
+                        schemas to the latest internal value, and may reject unrecognized
+                        values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                      type: string
+                    data:
+                      additionalProperties:
+                        format: byte
+                        type: string
+                      description: Data contains the secret data. Each key must consist
+                        of alphanumeric characters, '-', '_' or '.'. The serialized
+                        form of the secret data is a base64 encoded string, representing
+                        the arbitrary (possibly non-string) data value here. Described
+                        in https://tools.ietf.org/html/rfc4648#section-4
+                      type: object
+                    immutable:
+                      description: Immutable, if set to true, ensures that data stored
+                        in the Secret cannot be updated (only object metadata can
+                        be modified). If not set to true, the field can be modified
+                        at any time. Defaulted to nil.
+                      type: boolean
+                    kind:
+                      description: 'Kind is a string value representing the REST resource
+                        this object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                        More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                      type: string
+                    metadata:
+                      description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
+                      type: object
+                    stringData:
+                      additionalProperties:
+                        type: string
+                      description: stringData allows specifying non-binary secret
+                        data in string form. It is provided as a write-only input
+                        field for convenience. All keys and values are merged into
+                        the data field on write, overwriting any existing values.
+                        The stringData field is never output when reading from the
+                        API.
+                      type: object
+                    type:
+                      description: 'Used to facilitate programmatic handling of secret
+                        data. More info: https://kubernetes.io/docs/concepts/configuration/secret/#secret-types'
+                      type: string
+                  type: object
+                type: array
+              start:
+                type: string
+              states:
+                items:
+                  properties:
+                    actionMode:
+                      type: string
+                    actions:
+                      items:
+                        properties:
+                          actionDataFilter:
+                            properties:
+                              fromStateData:
+                                type: string
+                              results:
+                                type: string
+                              toStateData:
+                                type: string
+                              useResults:
+                                type: boolean
+                            type: object
+                          condition:
+                            type: boolean
+                          eventRef:
+                            properties:
+                              consumeEventRef:
+                                type: string
+                              consumeEventTimeout:
+                                type: string
+                              contextAttributes:
+                                additionalProperties:
+                                  type: object
+                                description: TODO Define a custom type for ContextAttribute
+                                type: object
+                              data:
+                                type: string
+                              invoke:
+                                type: string
+                              produceEventRef:
+                                type: string
+                            required:
+                            - produceEventRef
+                            type: object
+                          functionRef:
+                            properties:
+                              arguments:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              invoke:
+                                type: string
+                              refName:
+                                type: string
+                              selectionSet:
+                                type: string
+                            required:
+                            - refName
+                            type: object
+                          name:
+                            type: string
+                          nonRetryableErrors:
+                            items:
+                              type: string
+                            type: array
+                          retryRef:
+                            type: string
+                          retryableErrors:
+                            items:
+                              type: string
+                            type: array
+                          sleep:
+                            description: Sleep ...
+                            properties:
+                              after:
+                                description: After Amount of time (ISO 8601 duration
+                                  format) to sleep after function/subflow invocation.
+                                  Does not apply if 'eventRef' is defined.
+                                type: string
+                              before:
+                                description: Before Amount of time (ISO 8601 duration
+                                  format) to sleep before function/subflow invocation.
+                                  Does not apply if 'eventRef' is defined.
+                                type: string
+                            type: object
+                          subFlowRef:
+                            type: string
+                        type: object
+                      type: array
+                    batchSize:
+                      type: integer
+                    branches:
+                      items:
+                        properties:
+                          actions:
+                            items:
+                              properties:
+                                actionDataFilter:
+                                  properties:
+                                    fromStateData:
+                                      type: string
+                                    results:
+                                      type: string
+                                    toStateData:
+                                      type: string
+                                    useResults:
+                                      type: boolean
+                                  type: object
+                                condition:
+                                  type: boolean
+                                eventRef:
+                                  properties:
+                                    consumeEventRef:
+                                      type: string
+                                    consumeEventTimeout:
+                                      type: string
+                                    contextAttributes:
+                                      additionalProperties:
+                                        type: object
+                                      description: TODO Define a custom type for ContextAttribute
+                                      type: object
+                                    data:
+                                      type: string
+                                    invoke:
+                                      type: string
+                                    produceEventRef:
+                                      type: string
+                                  required:
+                                  - produceEventRef
+                                  type: object
+                                functionRef:
+                                  properties:
+                                    arguments:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    invoke:
+                                      type: string
+                                    refName:
+                                      type: string
+                                    selectionSet:
+                                      type: string
+                                  required:
+                                  - refName
+                                  type: object
+                                name:
+                                  type: string
+                                nonRetryableErrors:
+                                  items:
+                                    type: string
+                                  type: array
+                                retryRef:
+                                  type: string
+                                retryableErrors:
+                                  items:
+                                    type: string
+                                  type: array
+                                sleep:
+                                  description: Sleep ...
+                                  properties:
+                                    after:
+                                      description: After Amount of time (ISO 8601
+                                        duration format) to sleep after function/subflow
+                                        invocation. Does not apply if 'eventRef' is
+                                        defined.
+                                      type: string
+                                    before:
+                                      description: Before Amount of time (ISO 8601
+                                        duration format) to sleep before function/subflow
+                                        invocation. Does not apply if 'eventRef' is
+                                        defined.
+                                      type: string
+                                  type: object
+                                subFlowRef:
+                                  type: string
+                              type: object
+                            type: array
+                          name:
+                            type: string
+                          timeouts:
+                            properties:
+                              actionExecTimeout:
+                                type: string
+                              branchExecTimeout:
+                                type: string
+                              eventTimeout:
+                                type: string
+                              stateExecTimeout:
+                                type: string
+                              workflowExecTimeout:
+                                type: string
+                            type: object
+                        required:
+                        - actions
+                        - name
+                        type: object
+                      type: array
+                    compensatedBy:
+                      type: string
+                    completionType:
+                      type: string
+                    data:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    dataConditions:
+                      items:
+                        properties:
+                          condition:
+                            type: string
+                          end:
+                            type: boolean
+                          metadata:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - key
+                              - value
+                              type: object
+                            type: array
+                          name:
+                            type: string
+                          transition:
+                            type: string
+                        required:
+                        - condition
+                        type: object
+                      type: array
+                    defaultCondition:
+                      description: 'TODO: Define a type for DefaultCondition object'
+                      type: string
+                    duration:
+                      type: string
+                    end:
+                      type: boolean
+                    eventConditions:
+                      items:
+                        properties:
+                          end:
+                            type: boolean
+                          eventDataFilter:
+                            properties:
+                              data:
+                                type: string
+                              toStateData:
+                                type: string
+                              useData:
+                                type: boolean
+                            type: object
+                          eventRef:
+                            type: string
+                          metadata:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - key
+                              - value
+                              type: object
+                            type: array
+                          name:
+                            type: string
+                          transition:
+                            type: string
+                        required:
+                        - eventRef
+                        type: object
+                      type: array
+                    eventDataFilter:
+                      properties:
+                        data:
+                          type: string
+                        toStateData:
+                          type: string
+                        useData:
+                          type: boolean
+                      type: object
+                    eventRef:
+                      properties:
+                        consumeEventRef:
+                          type: string
+                        consumeEventTimeout:
+                          type: string
+                        contextAttributes:
+                          additionalProperties:
+                            type: object
+                          description: TODO Define a custom type for ContextAttribute
+                          type: object
+                        data:
+                          type: string
+                        invoke:
+                          type: string
+                        produceEventRef:
+                          type: string
+                      required:
+                      - produceEventRef
+                      type: object
+                    exclusive:
+                      type: boolean
+                    inputCollection:
+                      type: string
+                    iterationParam:
+                      type: string
+                    metadata:
+                      items:
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+                        required:
+                        - key
+                        - value
+                        type: object
+                      type: array
+                    mode:
+                      type: string
+                    name:
+                      type: string
+                    numCompleted:
+                      type: integer
+                    onErrors:
+                      items:
+                        properties:
+                          end:
+                            type: boolean
+                          errorRef:
+                            type: string
+                          errorRefs:
+                            items:
+                              type: string
+                            type: array
+                          transition:
+                            type: string
+                        required:
+                        - errorRef
+                        - errorRefs
+                        type: object
+                      type: array
+                    onEvents:
+                      items:
+                        properties:
+                          actionMode:
+                            type: string
+                          actions:
+                            items:
+                              properties:
+                                actionDataFilter:
+                                  properties:
+                                    fromStateData:
+                                      type: string
+                                    results:
+                                      type: string
+                                    toStateData:
+                                      type: string
+                                    useResults:
+                                      type: boolean
+                                  type: object
+                                condition:
+                                  type: boolean
+                                eventRef:
+                                  properties:
+                                    consumeEventRef:
+                                      type: string
+                                    consumeEventTimeout:
+                                      type: string
+                                    contextAttributes:
+                                      additionalProperties:
+                                        type: object
+                                      description: TODO Define a custom type for ContextAttribute
+                                      type: object
+                                    data:
+                                      type: string
+                                    invoke:
+                                      type: string
+                                    produceEventRef:
+                                      type: string
+                                  required:
+                                  - produceEventRef
+                                  type: object
+                                functionRef:
+                                  properties:
+                                    arguments:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    invoke:
+                                      type: string
+                                    refName:
+                                      type: string
+                                    selectionSet:
+                                      type: string
+                                  required:
+                                  - refName
+                                  type: object
+                                name:
+                                  type: string
+                                nonRetryableErrors:
+                                  items:
+                                    type: string
+                                  type: array
+                                retryRef:
+                                  type: string
+                                retryableErrors:
+                                  items:
+                                    type: string
+                                  type: array
+                                sleep:
+                                  description: Sleep ...
+                                  properties:
+                                    after:
+                                      description: After Amount of time (ISO 8601
+                                        duration format) to sleep after function/subflow
+                                        invocation. Does not apply if 'eventRef' is
+                                        defined.
+                                      type: string
+                                    before:
+                                      description: Before Amount of time (ISO 8601
+                                        duration format) to sleep before function/subflow
+                                        invocation. Does not apply if 'eventRef' is
+                                        defined.
+                                      type: string
+                                  type: object
+                                subFlowRef:
+                                  type: string
+                              type: object
+                            type: array
+                          eventDataFilter:
+                            properties:
+                              data:
+                                type: string
+                              toStateData:
+                                type: string
+                              useData:
+                                type: boolean
+                            type: object
+                          eventRefs:
+                            items:
+                              properties:
+                                consumeEventRef:
+                                  type: string
+                                consumeEventTimeout:
+                                  type: string
+                                contextAttributes:
+                                  additionalProperties:
+                                    type: object
+                                  description: TODO Define a custom type for ContextAttribute
+                                  type: object
+                                data:
+                                  type: string
+                                invoke:
+                                  type: string
+                                produceEventRef:
+                                  type: string
+                              required:
+                              - produceEventRef
+                              type: object
+                            type: array
+                        required:
+                        - eventRefs
+                        type: object
+                      type: array
+                    outputCollection:
+                      type: string
+                    stateDataFilter:
+                      properties:
+                        input:
+                          type: string
+                        output:
+                          type: string
+                      type: object
+                    timeouts:
+                      properties:
+                        actionExecTimeout:
+                          type: string
+                        branchExecTimeout:
+                          type: string
+                        eventTimeout:
+                          type: string
+                        stateExecTimeout:
+                          type: string
+                        workflowExecTimeout:
+                          type: string
+                      type: object
+                    transition:
+                      type: string
+                    type:
+                      enum:
+                      - event
+                      - operation
+                      - switch
+                      - sleep
+                      - parallel
+                      - inject
+                      - foreach
+                      type: string
+                    usedForCompensation:
+                      type: boolean
+                  required:
+                  - name
+                  - type
+                  type: object
+                type: array
+              timeouts:
+                items:
+                  properties:
+                    actionExecTimeout:
+                      type: string
+                    branchExecTimeout:
+                      type: string
+                    eventTimeout:
+                      type: string
+                    stateExecTimeout:
+                      type: string
+                    workflowExecTimeout:
+                      type: string
+                  type: object
+                type: array
+            required:
+            - start
+            - states
+            type: object
+          status:
+            description: KogitoServerlessWorkflowStatus defines the observed state
+              of KogitoServerlessWorkflow
+            properties:
+              address:
+                description: "Addressable provides a generic mechanism for a custom
+                  resource definition to indicate a destination for message delivery.
+                  \n Addressable is the schema for the destination information. This
+                  is typically stored in the object's `status`, as this information
+                  may be generated by the controller."
+                properties:
+                  url:
+                    type: string
+                type: object
+              applied:
+                description: KogitoServerlessWorkflowSpec defines the desired state
+                  of KogitoServerlessWorkflow
+                properties:
+                  auth:
+                    properties:
+                      name:
+                        type: string
+                      properties:
+                        properties:
+                          basic:
+                            properties:
+                              metadata:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                  - key
+                                  - value
+                                  type: object
+                                type: array
+                              password:
+                                type: string
+                              username:
+                                type: string
+                            required:
+                            - password
+                            - username
+                            type: object
+                          bearer:
+                            properties:
+                              metadata:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                  - key
+                                  - value
+                                  type: object
+                                type: array
+                              token:
+                                type: string
+                            required:
+                            - token
+                            type: object
+                          oauth2:
+                            properties:
+                              audiences:
+                                items:
+                                  type: string
+                                type: array
+                              basic:
+                                type: string
+                              clientId:
+                                type: string
+                              clientSecret:
+                                type: string
+                              grantType:
+                                type: string
+                              metadata:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                  - key
+                                  - value
+                                  type: object
+                                type: array
+                              password:
+                                type: string
+                              requestedIssuer:
+                                type: string
+                              requestedSubject:
+                                type: string
+                              scopes:
+                                items:
+                                  type: string
+                                type: array
+                              subjectToken:
+                                type: string
+                              username:
+                                type: string
+                            required:
+                            - clientId
+                            - grantType
+                            type: object
+                        type: object
+                      scheme:
+                        type: string
+                    required:
+                    - name
+                    - properties
+                    - scheme
+                    type: object
+                  autoRetries:
+                    type: boolean
+                  conditions:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      properties:
+                        code:
+                          type: string
+                        description:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - code
+                      - name
+                      type: object
+                    type: array
+                  events:
+                    items:
+                      properties:
+                        correlation:
+                          items:
+                            properties:
+                              contextAttributeName:
+                                type: string
+                              contextAttributeValue:
+                                type: string
+                            required:
+                            - contextAttributeName
+                            type: object
+                          type: array
+                        dataOnly:
+                          type: boolean
+                        kind:
+                          type: string
+                        metadata:
+                          items:
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        name:
+                          type: string
+                        source:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - name
+                      - type
+                      type: object
+                    type: array
+                  functions:
+                    items:
+                      properties:
+                        authRef:
+                          type: string
+                        metadata:
+                          items:
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        name:
+                          type: string
+                        operation:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - name
+                      - operation
+                      type: object
+                    type: array
+                  keepActive:
+                    type: boolean
+                  retries:
+                    properties:
+                      delay:
+                        type: string
+                      increment:
+                        type: string
+                      jitter:
+                        type: string
+                      maxAttempts:
+                        type: integer
+                      maxDelay:
+                        type: string
+                      multiplier:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  secrets:
+                    items:
+                      description: Secret holds secret data of a certain type. The
+                        total bytes of the values in the Data field must be less than
+                        MaxSecretSize bytes.
+                      properties:
+                        apiVersion:
+                          description: 'APIVersion defines the versioned schema of
+                            this representation of an object. Servers should convert
+                            recognized schemas to the latest internal value, and may
+                            reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                          type: string
+                        data:
+                          additionalProperties:
+                            format: byte
+                            type: string
+                          description: Data contains the secret data. Each key must
+                            consist of alphanumeric characters, '-', '_' or '.'. The
+                            serialized form of the secret data is a base64 encoded
+                            string, representing the arbitrary (possibly non-string)
+                            data value here. Described in https://tools.ietf.org/html/rfc4648#section-4
+                          type: object
+                        immutable:
+                          description: Immutable, if set to true, ensures that data
+                            stored in the Secret cannot be updated (only object metadata
+                            can be modified). If not set to true, the field can be
+                            modified at any time. Defaulted to nil.
+                          type: boolean
+                        kind:
+                          description: 'Kind is a string value representing the REST
+                            resource this object represents. Servers may infer this
+                            from the endpoint the client submits requests to. Cannot
+                            be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                          type: string
+                        metadata:
+                          description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
+                          type: object
+                        stringData:
+                          additionalProperties:
+                            type: string
+                          description: stringData allows specifying non-binary secret
+                            data in string form. It is provided as a write-only input
+                            field for convenience. All keys and values are merged
+                            into the data field on write, overwriting any existing
+                            values. The stringData field is never output when reading
+                            from the API.
+                          type: object
+                        type:
+                          description: 'Used to facilitate programmatic handling of
+                            secret data. More info: https://kubernetes.io/docs/concepts/configuration/secret/#secret-types'
+                          type: string
+                      type: object
+                    type: array
+                  start:
+                    type: string
+                  states:
+                    items:
+                      properties:
+                        actionMode:
+                          type: string
+                        actions:
+                          items:
+                            properties:
+                              actionDataFilter:
+                                properties:
+                                  fromStateData:
+                                    type: string
+                                  results:
+                                    type: string
+                                  toStateData:
+                                    type: string
+                                  useResults:
+                                    type: boolean
+                                type: object
+                              condition:
+                                type: boolean
+                              eventRef:
+                                properties:
+                                  consumeEventRef:
+                                    type: string
+                                  consumeEventTimeout:
+                                    type: string
+                                  contextAttributes:
+                                    additionalProperties:
+                                      type: object
+                                    description: TODO Define a custom type for ContextAttribute
+                                    type: object
+                                  data:
+                                    type: string
+                                  invoke:
+                                    type: string
+                                  produceEventRef:
+                                    type: string
+                                required:
+                                - produceEventRef
+                                type: object
+                              functionRef:
+                                properties:
+                                  arguments:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  invoke:
+                                    type: string
+                                  refName:
+                                    type: string
+                                  selectionSet:
+                                    type: string
+                                required:
+                                - refName
+                                type: object
+                              name:
+                                type: string
+                              nonRetryableErrors:
+                                items:
+                                  type: string
+                                type: array
+                              retryRef:
+                                type: string
+                              retryableErrors:
+                                items:
+                                  type: string
+                                type: array
+                              sleep:
+                                description: Sleep ...
+                                properties:
+                                  after:
+                                    description: After Amount of time (ISO 8601 duration
+                                      format) to sleep after function/subflow invocation.
+                                      Does not apply if 'eventRef' is defined.
+                                    type: string
+                                  before:
+                                    description: Before Amount of time (ISO 8601 duration
+                                      format) to sleep before function/subflow invocation.
+                                      Does not apply if 'eventRef' is defined.
+                                    type: string
+                                type: object
+                              subFlowRef:
+                                type: string
+                            type: object
+                          type: array
+                        batchSize:
+                          type: integer
+                        branches:
+                          items:
+                            properties:
+                              actions:
+                                items:
+                                  properties:
+                                    actionDataFilter:
+                                      properties:
+                                        fromStateData:
+                                          type: string
+                                        results:
+                                          type: string
+                                        toStateData:
+                                          type: string
+                                        useResults:
+                                          type: boolean
+                                      type: object
+                                    condition:
+                                      type: boolean
+                                    eventRef:
+                                      properties:
+                                        consumeEventRef:
+                                          type: string
+                                        consumeEventTimeout:
+                                          type: string
+                                        contextAttributes:
+                                          additionalProperties:
+                                            type: object
+                                          description: TODO Define a custom type for
+                                            ContextAttribute
+                                          type: object
+                                        data:
+                                          type: string
+                                        invoke:
+                                          type: string
+                                        produceEventRef:
+                                          type: string
+                                      required:
+                                      - produceEventRef
+                                      type: object
+                                    functionRef:
+                                      properties:
+                                        arguments:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        invoke:
+                                          type: string
+                                        refName:
+                                          type: string
+                                        selectionSet:
+                                          type: string
+                                      required:
+                                      - refName
+                                      type: object
+                                    name:
+                                      type: string
+                                    nonRetryableErrors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    retryRef:
+                                      type: string
+                                    retryableErrors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    sleep:
+                                      description: Sleep ...
+                                      properties:
+                                        after:
+                                          description: After Amount of time (ISO 8601
+                                            duration format) to sleep after function/subflow
+                                            invocation. Does not apply if 'eventRef'
+                                            is defined.
+                                          type: string
+                                        before:
+                                          description: Before Amount of time (ISO
+                                            8601 duration format) to sleep before
+                                            function/subflow invocation. Does not
+                                            apply if 'eventRef' is defined.
+                                          type: string
+                                      type: object
+                                    subFlowRef:
+                                      type: string
+                                  type: object
+                                type: array
+                              name:
+                                type: string
+                              timeouts:
+                                properties:
+                                  actionExecTimeout:
+                                    type: string
+                                  branchExecTimeout:
+                                    type: string
+                                  eventTimeout:
+                                    type: string
+                                  stateExecTimeout:
+                                    type: string
+                                  workflowExecTimeout:
+                                    type: string
+                                type: object
+                            required:
+                            - actions
+                            - name
+                            type: object
+                          type: array
+                        compensatedBy:
+                          type: string
+                        completionType:
+                          type: string
+                        data:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        dataConditions:
+                          items:
+                            properties:
+                              condition:
+                                type: string
+                              end:
+                                type: boolean
+                              metadata:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                  - key
+                                  - value
+                                  type: object
+                                type: array
+                              name:
+                                type: string
+                              transition:
+                                type: string
+                            required:
+                            - condition
+                            type: object
+                          type: array
+                        defaultCondition:
+                          description: 'TODO: Define a type for DefaultCondition object'
+                          type: string
+                        duration:
+                          type: string
+                        end:
+                          type: boolean
+                        eventConditions:
+                          items:
+                            properties:
+                              end:
+                                type: boolean
+                              eventDataFilter:
+                                properties:
+                                  data:
+                                    type: string
+                                  toStateData:
+                                    type: string
+                                  useData:
+                                    type: boolean
+                                type: object
+                              eventRef:
+                                type: string
+                              metadata:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                  - key
+                                  - value
+                                  type: object
+                                type: array
+                              name:
+                                type: string
+                              transition:
+                                type: string
+                            required:
+                            - eventRef
+                            type: object
+                          type: array
+                        eventDataFilter:
+                          properties:
+                            data:
+                              type: string
+                            toStateData:
+                              type: string
+                            useData:
+                              type: boolean
+                          type: object
+                        eventRef:
+                          properties:
+                            consumeEventRef:
+                              type: string
+                            consumeEventTimeout:
+                              type: string
+                            contextAttributes:
+                              additionalProperties:
+                                type: object
+                              description: TODO Define a custom type for ContextAttribute
+                              type: object
+                            data:
+                              type: string
+                            invoke:
+                              type: string
+                            produceEventRef:
+                              type: string
+                          required:
+                          - produceEventRef
+                          type: object
+                        exclusive:
+                          type: boolean
+                        inputCollection:
+                          type: string
+                        iterationParam:
+                          type: string
+                        metadata:
+                          items:
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        mode:
+                          type: string
+                        name:
+                          type: string
+                        numCompleted:
+                          type: integer
+                        onErrors:
+                          items:
+                            properties:
+                              end:
+                                type: boolean
+                              errorRef:
+                                type: string
+                              errorRefs:
+                                items:
+                                  type: string
+                                type: array
+                              transition:
+                                type: string
+                            required:
+                            - errorRef
+                            - errorRefs
+                            type: object
+                          type: array
+                        onEvents:
+                          items:
+                            properties:
+                              actionMode:
+                                type: string
+                              actions:
+                                items:
+                                  properties:
+                                    actionDataFilter:
+                                      properties:
+                                        fromStateData:
+                                          type: string
+                                        results:
+                                          type: string
+                                        toStateData:
+                                          type: string
+                                        useResults:
+                                          type: boolean
+                                      type: object
+                                    condition:
+                                      type: boolean
+                                    eventRef:
+                                      properties:
+                                        consumeEventRef:
+                                          type: string
+                                        consumeEventTimeout:
+                                          type: string
+                                        contextAttributes:
+                                          additionalProperties:
+                                            type: object
+                                          description: TODO Define a custom type for
+                                            ContextAttribute
+                                          type: object
+                                        data:
+                                          type: string
+                                        invoke:
+                                          type: string
+                                        produceEventRef:
+                                          type: string
+                                      required:
+                                      - produceEventRef
+                                      type: object
+                                    functionRef:
+                                      properties:
+                                        arguments:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        invoke:
+                                          type: string
+                                        refName:
+                                          type: string
+                                        selectionSet:
+                                          type: string
+                                      required:
+                                      - refName
+                                      type: object
+                                    name:
+                                      type: string
+                                    nonRetryableErrors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    retryRef:
+                                      type: string
+                                    retryableErrors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    sleep:
+                                      description: Sleep ...
+                                      properties:
+                                        after:
+                                          description: After Amount of time (ISO 8601
+                                            duration format) to sleep after function/subflow
+                                            invocation. Does not apply if 'eventRef'
+                                            is defined.
+                                          type: string
+                                        before:
+                                          description: Before Amount of time (ISO
+                                            8601 duration format) to sleep before
+                                            function/subflow invocation. Does not
+                                            apply if 'eventRef' is defined.
+                                          type: string
+                                      type: object
+                                    subFlowRef:
+                                      type: string
+                                  type: object
+                                type: array
+                              eventDataFilter:
+                                properties:
+                                  data:
+                                    type: string
+                                  toStateData:
+                                    type: string
+                                  useData:
+                                    type: boolean
+                                type: object
+                              eventRefs:
+                                items:
+                                  properties:
+                                    consumeEventRef:
+                                      type: string
+                                    consumeEventTimeout:
+                                      type: string
+                                    contextAttributes:
+                                      additionalProperties:
+                                        type: object
+                                      description: TODO Define a custom type for ContextAttribute
+                                      type: object
+                                    data:
+                                      type: string
+                                    invoke:
+                                      type: string
+                                    produceEventRef:
+                                      type: string
+                                  required:
+                                  - produceEventRef
+                                  type: object
+                                type: array
+                            required:
+                            - eventRefs
+                            type: object
+                          type: array
+                        outputCollection:
+                          type: string
+                        stateDataFilter:
+                          properties:
+                            input:
+                              type: string
+                            output:
+                              type: string
+                          type: object
+                        timeouts:
+                          properties:
+                            actionExecTimeout:
+                              type: string
+                            branchExecTimeout:
+                              type: string
+                            eventTimeout:
+                              type: string
+                            stateExecTimeout:
+                              type: string
+                            workflowExecTimeout:
+                              type: string
+                          type: object
+                        transition:
+                          type: string
+                        type:
+                          enum:
+                          - event
+                          - operation
+                          - switch
+                          - sleep
+                          - parallel
+                          - inject
+                          - foreach
+                          type: string
+                        usedForCompensation:
+                          type: boolean
+                      required:
+                      - name
+                      - type
+                      type: object
+                    type: array
+                  timeouts:
+                    items:
+                      properties:
+                        actionExecTimeout:
+                          type: string
+                        branchExecTimeout:
+                          type: string
+                        eventTimeout:
+                          type: string
+                        stateExecTimeout:
+                          type: string
+                        workflowExecTimeout:
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - start
+                - states
+                type: object
+              conditions:
+                description: The latest available observations of a resource's current
+                  state.
+                items:
+                  description: Condition describes the common structure for conditions
+                    in our types
+                  properties:
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human-readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type condition for the given object
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                description: The generation observed by the deployment controller.
+                format: int64
+                type: integer
+              recoverFailureAttempts:
+                description: keeps track of how many failure recovers a given workflow
+                  had so far
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kogito-serverless-operator-leader-election-role
+  namespace: kogito-serverless-operator-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: kogito-serverless-operator-builder-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - pods/exec
+  - services
+  - services/finalizers
+  - namespaces
+  - serviceaccounts
+  - persistentvolumeclaims
+  - secrets
+  - events
+  - deployments
+  - nodes
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - configmaps
+  - pods
+  - pods/exec
+  - services
+  - services/finalizers
+  - namespaces
+  - serviceaccounts
+  - persistentvolumeclaims
+  - secrets
+  - events
+  - deployments
+  - nodes
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kogito-serverless-operator-leases
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: kogito-serverless-operator-manager-role
+rules:
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessbuilds
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessbuilds/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessplatforms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessplatforms/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessplatforms/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessworkflows
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessworkflows/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - kogitoserverlessworkflows/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sw.kogito.kie.org
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kogito-serverless-operator-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kogito-serverless-operator-proxy-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kogito-serverless-operator-leader-election-rolebinding
+  namespace: kogito-serverless-operator-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kogito-serverless-operator-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kogito-serverless-operator-builder-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kogito-serverless-operator-builder-manager-role
+subjects:
+- kind: ServiceAccount
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kogito-serverless-operator-leases-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kogito-serverless-operator-leases
+subjects:
+- kind: ServiceAccount
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kogito-serverless-operator-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kogito-serverless-operator-manager-role
+subjects:
+- kind: ServiceAccount
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kogito-serverless-operator-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kogito-serverless-operator-proxy-role
+subjects:
+- kind: ServiceAccount
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: v1
+data:
+  DEFAULT_BUILDER_RESOURCE_NAME: Dockerfile
+  DEFAULT_WORKFLOW_EXTENSION: .sw.json
+  Dockerfile: "FROM quay.io/kiegroup/kogito-swf-builder-nightly:latest AS builder\n
+    \ \n  # Copy from build context to skeleton resources project\nCOPY * ./resources/\n\nRUN
+    /home/kogito/launch/build-app.sh ./resources\n  \n  #=============================\n
+    \ # Runtime Run\n  #=============================\nFROM registry.access.redhat.com/ubi8/openjdk-11:latest\n\nENV
+    LANG='en_US.UTF-8' LANGUAGE='en_US:en'\n  \n  # We make four distinct layers so
+    if there are application changes the library layers can be re-used\nCOPY --from=builder
+    --chown=185 /home/kogito/serverless-workflow-project/target/quarkus-app/lib/ /deployments/lib/\nCOPY
+    --from=builder --chown=185 /home/kogito/serverless-workflow-project/target/quarkus-app/*.jar
+    /deployments/\nCOPY --from=builder --chown=185 /home/kogito/serverless-workflow-project/target/quarkus-app/app/
+    /deployments/app/\nCOPY --from=builder --chown=185 /home/kogito/serverless-workflow-project/target/quarkus-app/quarkus/
+    /deployments/quarkus/\n\nEXPOSE 8080\nUSER 185\nENV AB_JOLOKIA_OFF=\"\"\nENV JAVA_OPTS=\"-Dquarkus.http.host=0.0.0.0
+    -Djava.util.logging.manager=org.jboss.logmanager.LogManager\"\nENV JAVA_APP_JAR=\"/deployments/quarkus-run.jar\"\n"
+kind: ConfigMap
+metadata:
+  name: kogito-serverless-operator-builder-config
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: v1
+data:
+  controller_manager_config.yaml: |
+    apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+    kind: ControllerManagerConfig
+    health:
+      healthProbeBindAddress: :8081
+    metrics:
+      bindAddress: 127.0.0.1:8080
+    webhook:
+      port: 9443
+    leaderElection:
+      leaderElect: true
+      resourceName: 1be5e57d.kiegroup.org
+kind: ConfigMap
+metadata:
+  name: kogito-serverless-operator-manager-config
+  namespace: kogito-serverless-operator-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: kogito-serverless-operator-controller-manager-metrics-service
+  namespace: kogito-serverless-operator-system
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    control-plane: controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: kogito-serverless-operator-controller-manager
+  namespace: kogito-serverless-operator-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+    spec:
+      containers:
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
+        name: kube-rbac-proxy
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+      - args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        command:
+        - /manager
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: quay.io/kiegroup/kogito-serverless-operator-nightly:2.0.0-snapshot
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: kogito-serverless-operator-controller-manager
+      terminationGracePeriodSeconds: 10
